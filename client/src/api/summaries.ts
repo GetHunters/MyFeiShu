@@ -3,21 +3,36 @@ import type {
   WorkSummaryDetail,
   WorkSummaryListResponse,
 } from '@shared/api.interface';
+import { demoData, markDemoMode } from './demo-data';
 
 export async function fetchWorkSummaries(): Promise<WorkSummaryListResponse> {
-  const response = await axiosForBackend({
-    url: '/api/summaries',
-    method: 'GET',
-  });
-  return response.data;
+  try {
+    const response = await axiosForBackend({
+      url: '/api/summaries',
+      method: 'GET',
+    });
+    return response.data;
+  } catch (err) {
+    markDemoMode();
+    return { items: demoData.summaries };
+  }
 }
 
 export async function fetchWorkSummaryDetail(
   id: string,
 ): Promise<WorkSummaryDetail> {
-  const response = await axiosForBackend({
-    url: `/api/summaries/${id}`,
-    method: 'GET',
-  });
-  return response.data;
+  try {
+    const response = await axiosForBackend({
+      url: `/api/summaries/${id}`,
+      method: 'GET',
+    });
+    return response.data;
+  } catch (err) {
+    markDemoMode();
+    const found = demoData.summaries.find((s) => s.id === id);
+    return {
+      ...(found ?? demoData.summaries[0]),
+      htmlContent: demoData.summaryDetailHtml,
+    };
+  }
 }
