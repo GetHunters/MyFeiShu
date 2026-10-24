@@ -1,0 +1,264 @@
+{
+  "paths": {
+    "/openapi/reports": {
+      "get": {
+        "operationId": "list",
+        "summary": "获取日报列表（按日期倒序）",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["items"],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": ["id", "title", "reportDate", "source", "updatedAt"],
+                        "properties": {
+                          "id": { "type": "string", "description": "日报 ID", "example": "3f2b1a4c-1111-2222-3333-444455556666" },
+                          "title": { "type": "string", "description": "日报标题", "example": "10月2日工作日报" },
+                          "reportDate": { "type": "string", "description": "业务日期（YYYY-MM-DD）", "example": "2026-10-02" },
+                          "source": { "type": "string", "enum": ["manual", "openapi"], "description": "来源：manual=手动上传，openapi=外部推送", "example": "openapi" },
+                          "updatedAt": { "type": "string", "format": "date-time", "description": "最近更新时间（ISO 8601）", "example": "2026-10-02T13:00:00.000Z" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "push",
+        "summary": "推送/更新一篇日报（按日期 upsert，同日期覆盖）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "reportDate", "htmlContent"],
+                "properties": {
+                  "title": { "type": "string", "description": "日报标题", "example": "10月3日工作日报" },
+                  "reportDate": { "type": "string", "description": "业务日期（YYYY-MM-DD，同日期已存在时覆盖更新）", "example": "2026-10-03" },
+                  "htmlContent": { "type": "string", "description": "日报 HTML 全文（完整独立的 HTML 文档）", "example": "<!DOCTYPE html><html><head><meta charset=\"utf-8\"></head><body><h1>10月3日工作日报</h1></body></html>" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["id", "reportDate", "overwritten"],
+                  "properties": {
+                    "id": { "type": "string", "description": "写入后的日报 ID", "example": "3f2b1a4c-1111-2222-3333-444455556666" },
+                    "reportDate": { "type": "string", "description": "业务日期", "example": "2026-10-03" },
+                    "overwritten": { "type": "boolean", "description": "是否覆盖了同日期的已有日报", "example": false }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/openapi/reports/{id}": {
+      "get": {
+        "operationId": "detail",
+        "summary": "按 ID 获取日报详情（含 HTML 全文）",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "日报 ID",
+            "example": "3f2b1a4c-1111-2222-3333-444455556666"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["id", "title", "reportDate", "source", "updatedAt", "htmlContent"],
+                  "properties": {
+                    "id": { "type": "string", "description": "日报 ID", "example": "3f2b1a4c-1111-2222-3333-444455556666" },
+                    "title": { "type": "string", "description": "日报标题", "example": "10月2日工作日报" },
+                    "reportDate": { "type": "string", "description": "业务日期（YYYY-MM-DD）", "example": "2026-10-02" },
+                    "source": { "type": "string", "enum": ["manual", "openapi"], "description": "来源", "example": "manual" },
+                    "updatedAt": { "type": "string", "format": "date-time", "description": "最近更新时间（ISO 8601）", "example": "2026-10-02T13:00:00.000Z" },
+                    "htmlContent": { "type": "string", "description": "日报 HTML 全文", "example": "<!DOCTYPE html><html>...</html>" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/openapi/maintenance": {
+      "get": {
+        "operationId": "list",
+        "summary": "获取保养记录列表（按日期倒序）",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["items"],
+                  "properties": {
+                    "items": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "required": ["id", "title", "recordDate", "source", "updatedAt"],
+                        "properties": {
+                          "id": { "type": "string", "description": "保养记录 ID", "example": "7c3d2e1f-aaaa-bbbb-cccc-555566667777" },
+                          "title": { "type": "string", "description": "保养记录标题", "example": "10月5日设备保养记录" },
+                          "recordDate": { "type": "string", "description": "业务日期（YYYY-MM-DD）", "example": "2026-10-05" },
+                          "source": { "type": "string", "enum": ["manual", "openapi"], "description": "来源：openapi=外部推送", "example": "openapi" },
+                          "updatedAt": { "type": "string", "format": "date-time", "description": "最近更新时间（ISO 8601）", "example": "2026-10-05T13:00:00.000Z" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "operationId": "push",
+        "summary": "推送/更新一条保养记录（按日期 upsert，同日期覆盖）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "recordDate", "htmlContent"],
+                "properties": {
+                  "title": { "type": "string", "description": "保养记录标题", "example": "10月5日设备保养记录" },
+                  "recordDate": { "type": "string", "description": "业务日期（YYYY-MM-DD，同日期已存在时覆盖更新）", "example": "2026-10-05" },
+                  "htmlContent": { "type": "string", "description": "保养记录 HTML 全文（完整独立的 HTML 文档）", "example": "<!DOCTYPE html><html><head><meta charset=\"utf-8\"></head><body><h1>10月5日设备保养记录</h1></body></html>" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["id", "recordDate", "overwritten"],
+                  "properties": {
+                    "id": { "type": "string", "description": "写入后的保养记录 ID", "example": "7c3d2e1f-aaaa-bbbb-cccc-555566667777" },
+                    "recordDate": { "type": "string", "description": "业务日期", "example": "2026-10-05" },
+                    "overwritten": { "type": "boolean", "description": "是否覆盖了同日期的已有保养记录", "example": false }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/openapi/maintenance/{id}": {
+      "get": {
+        "operationId": "detail",
+        "summary": "按 ID 获取保养记录详情（含 HTML 全文）",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": { "type": "string" },
+            "description": "保养记录 ID",
+            "example": "7c3d2e1f-aaaa-bbbb-cccc-555566667777"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["id", "title", "recordDate", "source", "updatedAt", "htmlContent"],
+                  "properties": {
+                    "id": { "type": "string", "description": "保养记录 ID", "example": "7c3d2e1f-aaaa-bbbb-cccc-555566667777" },
+                    "title": { "type": "string", "description": "保养记录标题", "example": "10月5日设备保养记录" },
+                    "recordDate": { "type": "string", "description": "业务日期（YYYY-MM-DD）", "example": "2026-10-05" },
+                    "source": { "type": "string", "enum": ["manual", "openapi"], "description": "来源", "example": "openapi" },
+                    "updatedAt": { "type": "string", "format": "date-time", "description": "最近更新时间（ISO 8601）", "example": "2026-10-05T13:00:00.000Z" },
+                    "htmlContent": { "type": "string", "description": "保养记录 HTML 全文", "example": "<!DOCTYPE html><html>...</html>" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/openapi/summaries": {
+      "post": {
+        "operationId": "push",
+        "summary": "推送/更新一篇工作总结（按日期 upsert，同日期覆盖；仅管理员可在站内读取）",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["title", "summaryDate", "htmlContent"],
+                "properties": {
+                  "title": { "type": "string", "description": "工作总结标题", "example": "10月5日工作总结" },
+                  "summaryDate": { "type": "string", "description": "业务日期（YYYY-MM-DD，同日期已存在时覆盖更新）", "example": "2026-10-05" },
+                  "htmlContent": { "type": "string", "description": "工作总结 HTML 全文（完整独立的 HTML 文档）", "example": "<!DOCTYPE html><html><head><meta charset=\"utf-8\"></head><body><h1>10月5日工作总结</h1></body></html>" }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["id", "summaryDate", "overwritten"],
+                  "properties": {
+                    "id": { "type": "string", "description": "写入后的工作总结 ID", "example": "9e8f7a6b-cccc-dddd-eeee-888899990000" },
+                    "summaryDate": { "type": "string", "description": "业务日期", "example": "2026-10-05" },
+                    "overwritten": { "type": "boolean", "description": "是否覆盖了同日期的已有工作总结", "example": false }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
